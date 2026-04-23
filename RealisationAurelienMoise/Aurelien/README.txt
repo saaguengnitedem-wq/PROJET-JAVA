@@ -1,7 +1,7 @@
 =====================================================
 Dossier personnel : AURELIEN
-Role : Logique metier, affichage, orchestration Main,
-       patterns de conception (Strategy, Dependency Injection)
+Role :  affichage, orchestration Main,
+       patterns de conception
 =====================================================
 
 Fichiers dont je suis responsable :
