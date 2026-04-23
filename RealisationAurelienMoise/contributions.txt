@@ -1,0 +1,167 @@
+================================================================
+CONTRIBUTIONS - Projet 1 : Gestion de notes des etudiants (V3)
+================================================================
+
+Equipe : Aurelien et Moise.
+
+Cette version V3 a etendu le projet pour y integrer explicitement
+les principes SOLID, l'heritage, les interfaces, les classes
+abstraites et la gestion d'exceptions personnalisees.
+
+Le travail a ete reparti selon une logique de "couches" :
+  - Moise s'est occupe de la BASE (modele + exceptions + I/O) ;
+  - Aurelien s'est occupe de ce qui s'APPUIE sur cette base
+    (logique metier + affichage + orchestration Main).
+
+Chacun a relu le code de l'autre avant commit.
+
+----------------------------------------------------------------
+MOISE - Modele, exceptions personnalisees et interfaces I/O
+----------------------------------------------------------------
+Fichiers produits :
+
+  Modele :
+    - src/modele/Personne.java                  (classe ABSTRAITE)
+    - src/modele/Etudiant.java                  (extends Personne,
+                                                 implements Comparable)
+    - src/modele/Note.java                      (classe IMMUABLE, final)
+
+  Hierarchie d'exceptions :
+    - src/exceptions/DonneeInvalideException.java  (exception mere)
+    - src/exceptions/NoteInvalideException.java    (extends DonneeInvalideException)
+    - src/exceptions/MatriculeInvalideException.java
+    - src/exceptions/LectureException.java
+    - src/exceptions/EcritureException.java
+
+  Entrees / Sorties :
+    - src/io/ILecteurEtudiants.java             (INTERFACE)
+    - src/io/IEcrivainResultats.java            (INTERFACE)
+    - src/io/LecteurCSV.java                    (implements ILecteurEtudiants)
+    - src/io/EcrivainResultats.java             (implements IEcrivainResultats)
+
+  Donnees :
+    - data/etudiants.csv                        (8 etudiants, 32 notes)
+
+  Documentation :
+    - Moise/README.txt
+
+Taches realisees :
+  - Conception de la classe abstraite Personne avec methode
+    abstraite getCategorie() et constructeur protege qui
+    valide le matricule (fail-fast).
+  - Mise en place de l'heritage Etudiant extends Personne
+    avec redefinition de getCategorie() (polymorphisme).
+  - Implementation de Comparable<Etudiant> (tri naturel par
+    moyenne decroissante).
+  - Immutabilite de Note : classe final, attributs final,
+    validation dans le constructeur.
+  - Encapsulation defensive : getNotes() retourne
+    Collections.unmodifiableList.
+  - Conception de la hierarchie d'exceptions personnalisees
+    (DonneeInvalideException et ses filles, LectureException,
+    EcritureException).
+  - Definition du contrat de lecture via ILecteurEtudiants
+    et du contrat d'ecriture via IEcrivainResultats (SOLID - D).
+  - Implementation LecteurCSV avec :
+      * try-with-resources pour fermer le Scanner
+      * gestion des erreurs en deux niveaux (local non bloquant
+        vs global bloquant)
+      * transformation des exceptions JDK en exceptions metier
+      * support des separateurs decimaux . et ,
+      * regroupement par matricule via LinkedHashMap
+      * compteur de lignes rejetees
+  - Implementation EcrivainResultats avec injection de
+    dependance (IStrategieMention recue au constructeur) et
+    Locale.ROOT pour la compatibilite internationale.
+  - Preparation du jeu de donnees etudiants.csv (8 etudiants,
+    4 cours chacun, notes variees pour tester toutes les
+    mentions).
+
+Commits principaux :
+  - "Classe abstraite Personne avec validation fail-fast"
+  - "Etudiant extends Personne + implements Comparable"
+  - "Note devient immuable (final + attributs final)"
+  - "Hierarchie d'exceptions personnalisees"
+  - "Interfaces ILecteurEtudiants et IEcrivainResultats"
+  - "LecteurCSV avec try-with-resources et gestion 2 niveaux"
+  - "EcrivainResultats avec injection de strategie de mention"
+  - "Jeu de donnees de test etudiants.csv"
+
+----------------------------------------------------------------
+AURELIEN - Logique metier, affichage, orchestration, patterns
+----------------------------------------------------------------
+Fichiers produits :
+
+  Logique metier :
+    - src/service/GestionnaireEtudiants.java
+    - src/service/IStrategieMention.java        (INTERFACE - Strategy)
+    - src/service/MentionFrancaise.java         (implementation)
+    - src/service/MentionNordAmericaine.java    (implementation)
+
+  Affichage :
+    - src/util/IAfficheur.java                  (INTERFACE)
+    - src/util/AfficheurConsole.java            (implementation)
+
+  Orchestration :
+    - src/Main.java                             (injection de dependances,
+                                                 gestion globale d'exceptions)
+
+  Documentation globale :
+    - README.md global
+    - contributions.txt
+    - Aurelien/README.txt
+
+Taches realisees :
+  - Application du STRATEGY PATTERN pour les mentions :
+    interface IStrategieMention + deux implementations
+    (MentionFrancaise, MentionNordAmericaine). Changer de
+    bareme = changer UNE ligne dans Main.
+  - GestionnaireEtudiants :
+      * copie defensive dans le constructeur
+      * classerParMoyenne() utilise Collections.sort() qui
+        tire parti de l'ordre naturel defini par Etudiant
+      * calculerMoyenneGenerale(), compterAdmis(),
+        rechercherParMatricule()
+      * getEtudiants() retourne une vue non modifiable.
+  - Interface IAfficheur permettant de brancher un autre
+    afficheur (HTML, graphique, silencieux pour les tests)
+    sans modifier le reste du projet.
+  - AfficheurConsole illustre le polymorphisme en appelant
+    etudiant.getCategorie() : la bonne version est choisie
+    au runtime (implementation de Personne via Etudiant).
+  - Main.java realise l'INJECTION DE DEPENDANCES :
+    n'instancie les classes concretes qu'a un seul endroit,
+    et ne travaille ensuite qu'avec les interfaces.
+  - Gestion globale des exceptions avec try/catch dans Main :
+      catch (LectureException)  -> exit code 1
+      catch (EcritureException) -> exit code 2
+      catch (Exception)         -> exit code 99 (filet de securite)
+  - Support des arguments en ligne de commande pour
+    personnaliser les fichiers d'entree et de sortie.
+  - Redaction du README.md global (aligne fidelement sur
+    le code) et du present fichier contributions.txt.
+
+Commits principaux :
+  - "Interface IStrategieMention + 2 implementations (Strategy)"
+  - "GestionnaireEtudiants utilise Comparable d'Etudiant"
+  - "Interface IAfficheur + AfficheurConsole"
+  - "Main avec injection de dependances"
+  - "Gestion globale d'exceptions avec codes de sortie"
+  - "Documentation alignee sur le code"
+
+----------------------------------------------------------------
+TRAVAIL COMMUN
+----------------------------------------------------------------
+  - Reunion d'architecture initiale : decoupage en 5 packages
+    (exceptions, modele, io, service, util), choix des
+    interfaces et de la hierarchie d'exceptions.
+  - Revue de code mutuelle avant chaque commit important.
+  - Tests sur donnees correctes ET sur donnees volontairement
+    corrompues (lignes incompletes, notes hors bornes, valeurs
+    non numeriques, matricule vide, fichier inexistant).
+  - Alignement systematique de la documentation sur le code
+    livre (contrairement a la V2, les README decrivent fidelement
+    le code).
+  - Preparation de la presentation orale (repetition en binome).
+
+================================================================
