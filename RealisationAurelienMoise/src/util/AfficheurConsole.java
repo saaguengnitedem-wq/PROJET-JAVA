@@ -6,23 +6,7 @@ import service.GestionnaireEtudiants;
 
 import java.util.List;
 
-/**
- * Implémentation console de {@link IAfficheur}.
- *
- * <p>Toutes les méthodes écrivent sur {@code System.out} ; les
- * éventuelles erreurs (étudiant null) sont signalées sur
- * {@code System.err}.
- *
- * <p>Cette classe illustre aussi le POLYMORPHISME : dans
- * {@link #afficherDetailEtudiant(Etudiant)}, on appelle
- * {@code etudiant.getCategorie()}. Cet appel va chercher la bonne
- * implémentation au moment de l'exécution : "Étudiant" si c'est un
- * {@link Etudiant}, et plus tard "Enseignant" ou autre si la
- * hiérarchie de Personne est étendue.
- *
- * @author Aurelien et Moise
- * @version 3.0
- */
+
 public class AfficheurConsole implements IAfficheur {
 
     @Override
